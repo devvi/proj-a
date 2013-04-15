@@ -13,33 +13,112 @@ public var top_wall_tile_pref:GameObject;
 public var floor_out_1_pref:GameObject;
 
 private var rooms:Array;
+private var indices:Array;
 
 private	var EAST:int = 2;
 private	var SOUTH:int = 4;
 private	var NORTH:int = 8;
 private	var WEST:int = 16;
- 
+
+function attachDoorToRoom(doorCode:int, roomGo:GameObject)
+{
+	
+	// put in doors
+	var door:GameObject;
+	var doorX:float;
+	var doorY:float;
+	var doorW:float;
+	var doorH:float;
+	var room:Room = roomGo.GetComponent(Room);
+	var roomTransform:Transform = roomGo.transform;
+	
+	var myExSprite:exSprite = left_door_open_pref.GetComponent(exSprite);
+	
+	doorW = myExSprite.width; 
+	doorH = myExSprite.height;
+	var doors:Array = room.doors;
+	doors.Add(door);
+	Debug.Log("doors : " + doors);
+	if (doorCode & EAST)
+	{
+		doorX =  TOTAL_WIDTH/2 - 16 - doorW/2;
+		doorY = 0; 
+		door =  Instantiate(left_door_open_pref); 
+		door.GetComponent(exSprite).HFlip();
+		door.transform.position.x = doorX;
+		door.transform.position.y = doorY;
+		door.transform.position.z = 5;
+		door.transform.parent = roomTransform; 
+		doors.Add(door);
+	}
+			
+	if (doorCode & SOUTH)
+	{
+		doorX = 0;
+		doorY = - TOTAL_HEIGHT/2 + 16 + doorW/2; 
+		door =  Instantiate(left_door_open_pref); 
+		door.transform.position.x = doorX;
+		door.transform.position.y = doorY;
+		door.transform.Rotate(0, 0, 90); 
+		door.transform.position.z = 5;
+		door.transform.parent = roomTransform;  
+		doors.Add(door);
+	}
+			
+	if (doorCode & WEST) 
+	{
+		doorX = - TOTAL_WIDTH/2 + 16 + doorW/2;
+		doorY = 0; 
+		door =  Instantiate(left_door_open_pref); 
+		door.transform.position.x = doorX;
+		door.transform.position.y = doorY;
+		door.transform.position.z = 5;
+		door.transform.parent = roomTransform;  
+		doors.Add(door);
+	}
+	
+	if (doorCode & NORTH)
+	{ 
+		doorX = 0;
+		doorY = TOTAL_HEIGHT/2 - 16 - doorW/2; 
+		door =  Instantiate(left_door_open_pref); 
+		door.transform.position.x = doorX;
+		door.transform.position.y = doorY;
+		door.transform.Rotate(0, 0, -90); 
+		door.transform.position.z = 5;
+		door.transform.parent = roomTransform;  
+		doors.Add(door);
+	}
+}
+
+function hasDuplicatedRoomIndex(x:int, y:int)
+{
+	for (var i:int = 0; i < indices.length; i++)
+	{
+		var index:Array = indices[i];
+		if (index[1] == x && index[2] == y)
+			return true;
+	}
+	return false;
+}
 
 function generateRoom(indexX:int, indexY:int, numX:int, numY:int, doorCode:int)
 { 
 	var room:GameObject; 
-		
 	room = new GameObject("room "+ indexX + " " + indexY);
 	var roomComp:Room = room.AddComponent(Room);
+	var roomTransform:Transform = room.transform;
 	
 	var corners:Array = roomComp.corners;
 	var walls:Array = roomComp.walls;
 	var floors:Array = roomComp.floors;
 	var doors:Array = roomComp.doors;
 	
-	var roomTransform:Transform = room.transform;
-	
 	// wall first
 	//left top
 	var w : float;
 	var h : float; 
 	var corner:GameObject;
-	corners = new Array();
 	
 	var myExSprite : exSprite;
 	myExSprite = top_left_wall_pref.GetComponent(exSprite);
@@ -91,7 +170,6 @@ function generateRoom(indexX:int, indexY:int, numX:int, numY:int, doorCode:int)
 	var currPosY:float;
 	
 	// TOP FIRST
-	walls = new Array();
 	currPosY = TOTAL_HEIGHT/2 - tileH/2;  
 	currPosX = -TOTAL_WIDTH/2 + w + tileW/2;
 	for(var i:int = 0; i < tileNum + 1; i++ )
@@ -180,7 +258,7 @@ function generateRoom(indexX:int, indexY:int, numX:int, numY:int, doorCode:int)
 	
 	currPosY = TOTAL_HEIGHT/2 - w + tileH/2 + 1;  
 	currPosX = - TOTAL_WIDTH/2 + h - tileW/2 - 1;
-	floors = new Array();
+	
 	for(i = 0; i < numX + 2; i++ )
 	{ 
 		for(j = 0; j < numY + 2; j++ )
@@ -197,74 +275,18 @@ function generateRoom(indexX:int, indexY:int, numX:int, numY:int, doorCode:int)
 		currPosY = TOTAL_HEIGHT/2 - w + tileH/2 + 1;
 	}
 	
-	// put in doors
-	var door:GameObject;
-	var doorX:float;
-	var doorY:float;
-	var doorW:float;
-	var doorH:float;
-	
-	myExSprite = left_door_open_pref.GetComponent(exSprite);
-	
-	doorW = myExSprite.width; 
-	doorH = myExSprite.height;
-	doors = new Array();
-	
-	if (doorCode & EAST)
-	{
-		doorX =  TOTAL_WIDTH/2 - 16 - doorW/2;
-		doorY = 0; 
-		door =  Instantiate(left_door_open_pref); 
-		door.GetComponent(exSprite).HFlip();
-		door.transform.position.x = doorX;
-		door.transform.position.y = doorY;
-		door.transform.position.z = 5;
-		door.transform.parent = roomTransform; 
-		doors.Add(door);
-	}
-			
-	if (doorCode & SOUTH)
-	{
-		doorX = 0;
-		doorY = - TOTAL_HEIGHT/2 + 16 + doorW/2; 
-		door =  Instantiate(left_door_open_pref); 
-		door.transform.position.x = doorX;
-		door.transform.position.y = doorY;
-		door.transform.Rotate(0, 0, 90); 
-		door.transform.position.z = 5;
-		door.transform.parent = roomTransform;  
-		doors.Add(door);
-	}
-			
-	if (doorCode & WEST) 
-	{
-		doorX = - TOTAL_WIDTH/2 + 16 + doorW/2;
-		doorY = 0; 
-		door =  Instantiate(left_door_open_pref); 
-		door.transform.position.x = doorX;
-		door.transform.position.y = doorY;
-		door.transform.position.z = 5;
-		door.transform.parent = roomTransform;  
-		doors.Add(door);
-	}
-	
-	if (doorCode & NORTH)
-	{ 
-		doorX = 0;
-		doorY = TOTAL_HEIGHT/2 - 16 - doorW/2; 
-		door =  Instantiate(left_door_open_pref); 
-		door.transform.position.x = doorX;
-		door.transform.position.y = doorY;
-		door.transform.Rotate(0, 0, -90); 
-		door.transform.position.z = 5;
-		door.transform.parent = roomTransform;  
-		doors.Add(door);
-	}
+	attachDoorToRoom(doorCode, room);
 	
 	roomTransform.position.x = SCREEN_WIDTH * indexX;
 	roomTransform.position.y = SCREEN_HEIGHT * indexY;
 	rooms.Add(room);
+	
+	var index:Array = new Array();
+	index[1] = indexX;
+	index[2] = indexY;
+	indices.Add(index);
 }
+
 
 var currIdxX:int = 0;
 var currIdxY:int = 0;
@@ -302,13 +324,36 @@ function rollRooms(nx:int, ny:int, distance:int)
 	}
 	else
 	{	
-		Debug.Log("generate");
-		Debug.Log("currIndexX: " + currIdxX);
-		Debug.Log("currIndexY: " + currIdxY);
+		if (hasDuplicatedRoomIndex(currIdxX, currIdxY))
+		{
+			var room:GameObject = GameObject.Find("room "+ currIdxX + " " + currIdxY);
+			attachDoorToRoom(lastDoorDirc, room);
+			if (doorDirct & EAST)
+			{
+				currIdxX -= 1;
+			}
+			
+			if (doorDirct & SOUTH)
+			{
+				currIdxY += 1;
+			}
+			
+			if (doorDirct & WEST)
+			{
+				currIdxX += 1;
+			}
+			
+			if (doorDirct & NORTH)
+			{
+				currIdxY -= 1;
+			}
+			rollRooms(nx, ny, distance);
+		}
 		generateRoom(currIdxX, currIdxY, nx, ny, doorDirct + lastDoorDirc);
+		level += 1;
 	}
 	
-	level += 1;
+	
 	Debug.Log("pre");
 	Debug.Log("currIndexX: " + currIdxX);
 	Debug.Log("currIndexY: " + currIdxY);
@@ -339,7 +384,7 @@ function rollRooms(nx:int, ny:int, distance:int)
 	
 	Debug.Log("after");
 	Debug.Log("currIndexX: " + currIdxX);
-	Debug.Log("currIndexY: " + currIdxY);
+	Debug.Log("currIndexY: " + currIdxY);	
 	
 	rollRooms(nx, ny, distance);
 }
@@ -393,6 +438,7 @@ function Start () {
 	TOTAL_HEIGHT = hTotal;
 	 
 	rooms = new Array();
+	indices = new Array();
 	
 	rollRooms(nx, ny, 10);
 
