@@ -20,6 +20,9 @@
 |---|---|---|
 | Unity 版本 | Unity `4.1.2f1` | `Assembly-UnityScript.unityproj` 的编译宏为 `UNITY_4_1_2`；二进制场景中也记录了 `4.1.2f1` |
 | 最后业务提交 | 2013-04-15 | 仓库只有 `7333b6d`、`deabbcf` 两次提交 |
+| 相机 | 正交相机，`orthographicSize = 32` | `Assets/dungeonRoom.unity` |
+| 最后编辑器构建目标 | iPhone（iOS） | `Library/EditorUserBuildSettings.asset`；这是编辑器状态，不足以证明项目曾正式发布 |
+| 构建场景 | 空 | `ProjectSettings/EditorBuildSettings.asset` 未登记任何场景 |
 | 序列化格式 | 二进制 | `.unity`、`.prefab`、`.asset` 和 `ProjectSettings/*.asset` 均不是 YAML 文本 |
 | 元数据 | 缺失 | 仓库没有 `.meta` 文件，资源引用依赖当年的 `Library` 数据和二进制内部引用 |
 | 源工程整洁度 | 较差 | `Library/`、`Temp/`、IDE 产物和 `.DS_Store` 均被提交 |
@@ -31,7 +34,7 @@
 业务内容只有：
 
 - 主场景：`Assets/dungeonRoom.unity`
-  - 二进制内容可识别到 `Main Camera` 和 `_gameMgr`；
+  - 包含正交 `Main Camera`、`AudioListener` 和 `_gameMgr`；
 - 业务脚本：
   - `Assets/scripts/_gameMgr.js`：445 行，生成房间、墙、地板、门和十步随机路径；
   - `Assets/scripts/Room.js`：16 行，仅保存四类实例数组；
@@ -233,7 +236,7 @@ PNG 可直接复制到 Godot。导入设置统一为：
 
 1. 明确目标平台、窗口策略和“完整”的业务边界；
 2. 用隔离的 Unity 4.1.2 环境尝试打开原工程，禁止现代 Unity 原地升级；
-3. 记录主场景节点、相机 `orthographicSize`、窗口尺寸、各 prefab 的锚点/尺寸/Z 值和材质；
+3. 以已提取的 `orthographicSize = 32` 为起点，记录窗口尺寸、各 prefab 的锚点/尺寸/Z 值和材质；
 4. 固定至少 10 组随机运行结果，录屏并截取房间边界、门朝向、相邻关系；
 5. 尝试 AssetRipper 等工具读取二进制场景；输出只用于取证，不直接作为 Godot 源资产。
 
@@ -357,9 +360,9 @@ PNG 可直接复制到 Godot。导入设置统一为：
 | UnityScript 已移除 | 高 | 不升级脚本链，直接按行为重写为 GDScript |
 | ex2D DLL 无源码且年代久远 | 高 | 用 Sprite2D/TileMapLayer/AnimationPlayer 原生替代 |
 | 旧代码自身存在生成 bug | 高 | 先定义意图行为；测试唯一、连通、门互反和终止性 |
-| 相机尺寸/像素单位未知 | 中 | 阶段 A 读取二进制或运行旧版，冻结逻辑视口和 pivot |
+| 相机到像素单位的换算未知 | 中 | 已知 `orthographicSize = 32`；阶段 A 继续确认窗口尺寸、ex2D 单位和 pivot |
 | 第三方演示授权不明 | 中 | 不随产品迁移或发布，先确认许可证 |
-| 目标平台未指定 | 中 | 架构保持平台无关；导出阶段再按明确平台配置 |
+| 目标平台未指定 | 中 | 最后编辑器目标为 iPhone 但无发布证据；架构保持平台无关，导出阶段再确认 |
 | 把演示误当业务功能 | 中 | 以主场景引用和业务脚本调用为准，变更范围需书面确认 |
 
 ## 8. 工作量结构
